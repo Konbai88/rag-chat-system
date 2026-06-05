@@ -3,13 +3,13 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableWithMessageHistory
 from memory.file_history_store import get_history
-from services.knowlege_base import KnowledgeBaseService
+from services.knowledge_base import KnowledgeBaseService
 from retrieval.retrieval_service import RetrievalService
 from langchain_core.documents import Document
 
 
 class RagService:
-    """RAG 对话服务：检索 + 生成"""
+    """RAG 对话服务：检�?+ 生成"""
 
     def __init__(self, knowledge_base: KnowledgeBaseService) -> None:
         self.retrieval_service = RetrievalService(knowledge_base)
@@ -20,9 +20,9 @@ class RagService:
                 (
                     "system",
                     "严格依据参考资料回答。要求："
-                    "1. 若资料中存在明确答案，优先引用对应页码。"
-                    "2. 若资料不足以回答，明确说明'参考资料未提供足够信息'。"
-                    "3. 不要编造参考资料中不存在的信息。"
+                    "1. 若资料中存在明确答案，优先引用对应页码�?
+                    "2. 若资料不足以回答，明确说�?参考资料未提供足够信息'�?
+                    "3. 不要编造参考资料中不存在的信息�?
                     "参考资料：{content}",
                 ),
                 ("system", "并且结合以下的聊天历史回答用户问题："),
@@ -55,7 +55,7 @@ class RagService:
         return res
 
     def chat(self, user_input: str, config: dict[str, Any]) -> tuple[str, list[Document]]:
-        """接收用户输入，检索 + 生成回答"""
+        """接收用户输入，检�?+ 生成回答"""
         docs = self.retrieve_and_rerank(user_input)
         content = self.format_document(docs)
         ans = self.conversation_chain.invoke(
