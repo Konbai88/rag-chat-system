@@ -88,6 +88,9 @@ streamlit run ui/app.py
 langchain_project/
 ├── config/              # 配置文件
 �?  └── config_data.py
+├── database/            # MySQL 数据库
+�?  ├── session.py       # 连接管理
+�?  └── models.py        # ORM 数据模型
 ├── api/                 # REST API 接口
 �?  ├── app.py           # FastAPI 应用
 �?  └── schemas.py       # 请求/响应模型
