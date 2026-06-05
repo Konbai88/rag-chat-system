@@ -2,7 +2,7 @@ import os
 
 # ========== 路径 ==========
 md5_path = os.getenv("MD5_PATH", "./md5.text")
-persist_director = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
+persist_directory = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 
 # ========== 向量库 ==========
 collection_name = "rag"
