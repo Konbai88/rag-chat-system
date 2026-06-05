@@ -1,7 +1,7 @@
 import json
 import os
-from typing import Optional
 from io import IOBase
+from typing import Optional
 
 import config.config_data as config
 from utils.md5 import check_md5, save_md5, get_string_md5, delete_md5
@@ -15,7 +15,7 @@ from search.indexer import SearchIndexer
 
 
 class KnowledgeBaseService:
-    """知识库服务，管理文件上传、向量存储、ES 索引"""
+    """知识库服务：管理文件上传、向量存储、ES 索引"""
 
     def __init__(self, kb_id: str = "default") -> None:
         self.kb_id = kb_id
@@ -35,7 +35,7 @@ class KnowledgeBaseService:
         self.chroma = Chroma(
             collection_name=self.collection_name,
             embedding_function=DashScopeEmbeddings(model=config.embedding_model_name),
-            persist_directoryy=self.persist_directory,
+            persist_directory=self.persist_directory,
         )
         self.spliter = RecursiveCharacterTextSplitter(
             chunk_size=config.chunk_size,
@@ -45,14 +45,14 @@ class KnowledgeBaseService:
         )
 
     def _load_parent_store(self) -> dict[str, dict]:
-        """从磁盘加�?parent_store"""
+        """从磁盘加载 parent_store"""
         if os.path.exists(self.parent_store_path):
             with open(self.parent_store_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         return {}
 
     def _save_parent_store(self) -> None:
-        """保存 parent_store 到磁�?""
+        """保存 parent_store 到磁盘"""
         with open(self.parent_store_path, "w", encoding="utf-8") as f:
             json.dump(self.parent_store, f, ensure_ascii=False, indent=2)
 
@@ -61,7 +61,7 @@ class KnowledgeBaseService:
         return self.chroma.as_retriever(search_kwargs={"k": 2})
 
     def upload_file(self, uploaded_file: IOBase) -> str:
-        """上传文件，解析入�?""
+        """上传文件，解析入库"""
         from parser.factory import ParserFactory
 
         parser = ParserFactory.get_parser(uploaded_file)
@@ -105,21 +105,21 @@ class KnowledgeBaseService:
         return "ok,already."
 
     def clear_kb(self) -> bool:
-        """清空当前知识库（Chroma + ES + parent_store + md5�?""
+        """清空当前知识库（Chroma + ES + parent_store + md5）"""
         try:
             self.chroma.delete(where={"kb_id": self.kb_id})
             self.search_indexer.clear_by_kb_id(self.kb_id)
             self.parent_store = {}
             self._save_parent_store()
             open(config.md5_path, "w", encoding="utf-8").close()
-            logger.info(f"知识�?{self.kb_id} 已完全清�?)
+            logger.info(f"知识库 {self.kb_id} 已完全清空")
             return True
         except Exception as e:
             logger.error(f"清空失败 {str(e)}")
             return False
 
     def delete_file(self, filename: str) -> bool:
-        """根据文件名从知识库删�?""
+        """根据文件名从知识库删除"""
         try:
             parent_ids_to_del: list[str] = []
             parent_store = self._load_parent_store()
@@ -139,7 +139,7 @@ class KnowledgeBaseService:
             md5_str = get_string_md5(filename)
             delete_md5(md5_str)
 
-            logger.info(f"文件 {filename} 已从知识�?{self.kb_id} 中删�?)
+            logger.info(f"文件 {filename} 已从知识库 {self.kb_id} 中删除")
             return True
         except Exception as e:
             logger.error(f"删除文件失败 {str(e)}")
@@ -148,4 +148,4 @@ class KnowledgeBaseService:
     def rebuild_es_index(self) -> None:
         """重建 ES 索引"""
         self.search_indexer.rebuild_index()
-        logger.info("es 索引已重�?)
+        logger.info("es 索引已重建")
