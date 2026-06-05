@@ -22,12 +22,12 @@ class RetrievalService:
             [
                 (
                     "system",
-                    "你是一个查询改写助手，只需要改写用户的提问，不要回答用户的问题�?
-                    "请将用户问题改写成更适合知识库检索的查询�?
-                    "要求�?
+                    "你是一个查询改写助手，只需要改写用户的提问，不要回答用户的问题。"
+                    "请将用户问题改写成更适合知识库检索的查询。"
+                    "要求："
                     "1. 保持原始语义"
-                    "2. 补充可能的专业表�?
-                    "3. 输出简�?
+                    "2. 补充可能的专业表达"
+                    "3. 输出简洁"
                     "4. 不要回答问题",
                 ),
                 ("user", "{query}"),
@@ -37,24 +37,26 @@ class RetrievalService:
         self.rewrite_chain = self.rewrite_prompt | self.chat_model | StrOutputParser()
 
     def rewrite_query(self, query: str) -> str:
-        """LLM 改写用户查询，提升检索效�?""
+        """LLM 改写用户查询，提升检索效果"""
         return self.rewrite_chain.invoke({"query": query})
 
     def retrieve_and_rerank(self, query: str) -> list[Document]:
-        """完整检索链路：改写 �?双路召回 �?RRF 融合 �?重排 �?Parent 还原"""
-        logger.info("====进入正式检索函�?===")
+        """完整检索链路：改写 -> 双路召回 -> RRF 融合 -> 重排 -> Parent 还原"""
+        logger.info("====进入正式检索函数====")
         parent_docs: list[Document] = []
         seen_parent_ids: set[str] = set()
 
         re_query = self.rewrite_query(query)
         logger.info(f"rewrite query: {re_query}")
 
-        # 向量检�?        try:
+        # 向量检索
+        try:
             vector_docs = self.retriever.invoke(re_query)
         except Exception:
             vector_docs = []
 
-        # ES 关键词检�?        try:
+        # ES 关键词检索
+        try:
             search_docs = self.search_service.keyword_search(
                 re_query, self.knowledge_base.kb_id, top_k=2
             )
