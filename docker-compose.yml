@@ -60,12 +60,19 @@ services:
       - OLLAMA_MODEL=deepseek-r1:7b
       - CHROMA_PERSIST_DIR=/data/chroma_db
       - MD5_PATH=/data/md5.text
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=rag
+      - MYSQL_PASSWORD=rag_password
+      - MYSQL_DATABASE=rag_db
     volumes:
       - app_data:/data
     depends_on:
       elasticsearch:
         condition: service_healthy
       ollama:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -83,6 +90,11 @@ services:
       - OLLAMA_MODEL=deepseek-r1:7b
       - CHROMA_PERSIST_DIR=/data/chroma_db
       - MD5_PATH=/data/md5.text
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=rag
+      - MYSQL_PASSWORD=rag_password
+      - MYSQL_DATABASE=rag_db
     volumes:
       - app_data:/data
     depends_on:
@@ -90,8 +102,31 @@ services:
         condition: service_healthy
       ollama:
         condition: service_healthy
+      mysql:
+        condition: service_healthy
     command: >
       uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=rag_db
+      - MYSQL_USER=rag
+      - MYSQL_PASSWORD=rag_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     restart: unless-stopped
     networks:
       - rag-network
@@ -100,6 +135,7 @@ volumes:
   es_data:
   ollama_data:
   app_data:
+  mysql_data:
 
 networks:
   rag-network:
