@@ -3,6 +3,7 @@ from io import IOBase
 from parser.base import BaseParser
 from parser.pdf_parser import PDFParser
 from parser.docx_parser import DOCXParser
+from parser.txt_parser import TXTParser
 
 
 class ParserFactory:
@@ -17,5 +18,7 @@ class ParserFactory:
             return PDFParser()
         elif filename.endswith(".docx"):
             return DOCXParser()
+        elif filename.endswith(".txt"):
+            return TXTParser()
         else:
             raise ValueError(f"不支持该文件类型 {filename}")
