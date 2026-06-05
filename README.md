@@ -35,6 +35,9 @@
     └─→ [LLM 生成] ──→ deepseek-r1 + 参考来源引用
 ```
 
+> [!NOTE]
+> 在线查看：https://github.com/Konbai88/rag-chat-system
+
 ## 🧰 技术栈
 
 - **框架**: LangChain 1.2 · LangChain-Chroma · LangChain-Ollama
@@ -179,8 +182,7 @@ langchain_project/
 | **运行测试** | `pytest tests/ -v` |
 
 > 推送后可在 GitHub 仓库的 Actions 页面查看运行结果。
-> 把下面这行加到 README 顶部即可显示徽章（替换 `<OWNER>/<REPO>`）：
-> `[![CI](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml)`
+> 当前项目徽章：[![CI](https://github.com/Konbai88/rag-chat-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Konbai88/rag-chat-system/actions/workflows/ci.yml)
 
 ## 📄 许可证
 
