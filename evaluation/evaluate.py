@@ -1,6 +1,6 @@
 from evaluation.evaluation_data import qa_dataset
 from retrieval.retrieval_service import RetrievalService
-from services.knowlege_base import KnowledgeBaseService
+from services.knowledge_base import KnowledgeBaseService
 
 
 def run_evaluation() -> None:
