@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.17.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # 启动时自动拉取模型
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        ollama serve &
+        sleep 3
+        echo "📥 拉取模型 ${OLLAMA_MODEL:-deepseek-r1:7b} ..."
+        ollama pull ${OLLAMA_MODEL:-deepseek-r1:7b}
+        echo "✅ 模型就绪"
+        wait
+    environment:
+      - OLLAMA_MODEL=deepseek-r1:7b
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - ES_HOST=http://elasticsearch:9200
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=deepseek-r1:7b
+      - CHROMA_PERSIST_DIR=/data/chroma_db
+      - MD5_PATH=/data/md5.text
+    volumes:
+      - app_data:/data
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+volumes:
+  es_data:
+  ollama_data:
+  app_data:
+
+networks:
+  rag-network:
+    driver: bridge
